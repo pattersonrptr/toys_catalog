@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16:///toys_catalog_test
+    username: test
+    password: test
+  flyway:
+    enabled: true
+  jpa:
+    show-sql: true
