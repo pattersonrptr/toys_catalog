@@ -16,11 +16,11 @@ CREATE TABLE users (
 CREATE INDEX idx_users_email ON users (email);
 
 -- Usuário admin padrão (senha: Admin@123 — troque em produção!)
--- Hash BCrypt gerado com strength 12
+-- Hash BCrypt strength 12 gerado via: bcrypt.hashpw(b'Admin@123', bcrypt.gensalt(12))
 INSERT INTO users (name, email, password, role)
 VALUES (
     'Admin',
     'admin@shopfy.com',
-    '$2a$12$5XTRbMBEBFRp7hVtHEJt9.V8V8VzGH6kDcvTBW6r3JhMmEAGdQmcG',
+    '$2b$12$vBoJ55FscfsCClpLWWSK1OIRpzPdsn93IrqLj2UMoHTz3qRPcqTt2',
     'ADMIN'
 );

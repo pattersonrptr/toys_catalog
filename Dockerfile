@@ -1,24 +1,19 @@
 # ─────────────────────────────────────────────
-# Stage 1: Build  (usa Maven + JDK 21, isolado)
+# Stage 1: Build  (Maven + JDK 21 já incluídos)
 # ─────────────────────────────────────────────
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /build
 
-# Copia pom.xml primeiro para aproveitar o cache de layers do Docker:
-# dependências só são rebaixadas se o pom.xml mudar
+# Copia pom.xml primeiro — dependências só são rebaixadas se o pom.xml mudar
 COPY pom.xml .
-COPY .mvn/ .mvn/
 
-# Instala Maven via apk (versão estável do repositório Alpine)
-RUN apk add --no-cache maven
-
-# Baixa dependências offline antes de copiar o código (melhor uso de cache)
-RUN mvn dependency:go-offline -B --no-transfer-progress
+# Pré-resolve dependências para cachear esta layer separada do código
+RUN mvn dependency:resolve -B -q
 
 COPY src/ src/
 
 # Build sem testes (testes rodam no CI)
-RUN mvn package -DskipTests -B --no-transfer-progress
+RUN mvn package -DskipTests -B -q
 
 # ─────────────────────────────────────────────
 # Stage 2: Runtime (só JRE, imagem mínima)
