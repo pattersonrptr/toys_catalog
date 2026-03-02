@@ -32,7 +32,9 @@ public class SecurityConfig {
     private final ShopfyUserDetailsService userDetailsService;
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/api/v1/products",
             "/api/v1/products/**",
+            "/api/v1/categories",
             "/api/v1/categories/**",
             "/api-docs/**",
             "/swagger-ui/**",

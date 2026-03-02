@@ -47,7 +47,8 @@ Layered Architecture inspired by Domain-Driven Design, easy to evolve toward Hex
 docker compose up --build
 ```
 - API: http://localhost:8080/api/v1
-- Swagger UI: http://localhost:8080/swagger-ui.html
+- Swagger UI: http://localhost:8080/swagger-ui.html  
+  *(click **Authorize 🔒**, paste the token from `POST /auth/login` to unlock protected endpoints)*
 - Health: http://localhost:8080/actuator/health
 
 ### Option B — Development mode (only database, run app from IDE)
@@ -146,12 +147,14 @@ Seeded automatically by Flyway on first run:
 
 ## 🧪 Running tests
 
+### Unit / slice tests (no Docker required)
+
 ```bash
 docker run --rm -v "$(pwd)":/workspace -w /workspace \
   maven:3.9-eclipse-temurin-21-alpine mvn test
 ```
 
-Tests use **Mockito** (unit) and **Testcontainers** (integration — spins up a real PostgreSQL). Docker must be running.
+Tests use **H2 in-memory** (PostgreSQL compatibility mode) + **Mockito**. No running containers needed.
 
 **Current status: 15/15 passing ✅**
 
@@ -161,6 +164,22 @@ Tests use **Mockito** (unit) and **Testcontainers** (integration — spins up a 
 | `JwtServiceTest`         | 6     | ✅     |
 | `AuthServiceTest`        | 4     | ✅     |
 | `ProductServiceTest`     | 4     | ✅     |
+
+### Smoke tests (requires running stack)
+
+```bash
+docker compose up --build -d
+./scripts/smoke/run_all_tests.sh
+```
+
+**Current status: 32/32 passing ✅**
+
+| Suite            | Tests | Status |
+|------------------|-------|--------|
+| Authentication   | 7     | ✅     |
+| User (/me)       | 3     | ✅     |
+| Categories       | 10    | ✅     |
+| Products         | 12    | ✅     |
 
 ---
 
@@ -185,6 +204,9 @@ Tests use **Mockito** (unit) and **Testcontainers** (integration — spins up a 
 - [x] BCrypt password hashing
 - [x] Flyway V3 migration (users table + default admin seed)
 - [x] `JwtAuthenticationFilter` (stateless, `OncePerRequestFilter`)
+- [x] Swagger UI **Authorize** button (`bearerAuth` SecurityScheme)
+- [x] Smoke test suite (32 tests across 4 suites, `scripts/smoke/`)
+- [x] H2 in-memory for unit/slice tests — no Docker required
 - [x] Unit tests: `JwtServiceTest`, `AuthServiceTest`
 
 ### 🛒 Phase 3 — Product Images
