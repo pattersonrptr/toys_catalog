@@ -7,13 +7,17 @@ source "$(dirname "$0")/_common.sh"
 
 header "Auth — register"
 
+# Unique email per run so re-runs don't collide with existing data
+SMOKE_EMAIL="smoke.$(date +%s)@shopfy.com"
+export SMOKE_EMAIL
+
 # ── 1. Register a new customer ────────────────────────────────────────────────
-curl_json POST /api/v1/auth/register '{"name":"Smoke Test User","email":"smoke@shopfy.com","password":"Smoke@123"}'
-assert_status "Register new customer → 200" 200 "$STATUS" "$BODY"
+curl_json POST /api/v1/auth/register "{\"name\":\"Smoke Test User\",\"email\":\"$SMOKE_EMAIL\",\"password\":\"Smoke@123\"}"
+assert_status "Register new customer → 201" 201 "$STATUS" "$BODY"
 CUSTOMER_TOKEN=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('accessToken',''))" 2>/dev/null || true)
 
 # ── 2. Register duplicate email → 409 ────────────────────────────────────────
-curl_json POST /api/v1/auth/register '{"name":"Dup","email":"smoke@shopfy.com","password":"Smoke@123"}'
+curl_json POST /api/v1/auth/register "{\"name\":\"Dup\",\"email\":\"$SMOKE_EMAIL\",\"password\":\"Smoke@123\"}"
 assert_status "Register duplicate email → 409" 409 "$STATUS" "$BODY"
 
 # ── 3. Register with invalid data → 400 ──────────────────────────────────────
@@ -34,7 +38,7 @@ fi
 export TOKEN
 
 # ── 5. Login with registered customer ────────────────────────────────────────
-curl_json POST /api/v1/auth/login '{"email":"smoke@shopfy.com","password":"Smoke@123"}'
+curl_json POST /api/v1/auth/login "{\"email\":\"$SMOKE_EMAIL\",\"password\":\"Smoke@123\"}"
 assert_status "Login customer → 200" 200 "$STATUS" "$BODY"
 export CUSTOMER_TOKEN
 

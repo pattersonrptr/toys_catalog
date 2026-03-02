@@ -45,7 +45,7 @@ GRAND_PASS=0
 GRAND_FAIL=0
 declare -a SUITE_RESULTS=()
 
-# ── helper: run one script and capture its exit code + totals ────────────────
+# ── helper: run one script as a child process, TOKEN passed via environment ──
 run_suite() {
   local script="$1"
   local label="$2"
@@ -54,14 +54,10 @@ run_suite() {
   echo -e "${BOLD}  Suite: ${label}${RESET}"
   echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
 
-  # Run the script; capture exit status without stopping overall run
-  # Each script calls summary() which sets PASS/FAIL env vars and exits.
-  # We source to inherit TOKEN exported by test_auth.sh.
+  # TOKEN and BASE_URL are exported; child inherits them via environment.
+  # Run in a subshell so that set -e inside the script doesn't kill us.
   set +e
-  (
-    # shellcheck source=/dev/null
-    source "$script"
-  )
+  bash "$script"
   local rc=$?
   set -e
 

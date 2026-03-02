@@ -28,11 +28,11 @@ assert_status() {
   local label="$1" expected="$2" actual="$3" body="${4:-}"
   if [ "$actual" -eq "$expected" ]; then
     echo -e "  ${GREEN}✔ $label${RESET} (HTTP $actual)"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "  ${RED}✘ $label${RESET} — expected HTTP $expected, got HTTP $actual"
     [ -n "$body" ] && echo -e "    ${YELLOW}Body: $body${RESET}"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
     ERRORS+=("$label: expected $expected got $actual")
   fi
 }
