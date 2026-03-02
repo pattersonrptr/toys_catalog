@@ -1,0 +1,25 @@
+# ── Java build ──────────────────────────────────────────────────────────────
+target/
+*.jar
+*.war
+*.ear
+
+# ── IDE ─────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.eclipse/
+.classpath
+.project
+.settings/
+.vscode/settings.json
+
+# ── Docker / ambiente ────────────────────────────────────────────────────────
+.env                   # Nunca commitar credenciais reais
+docker-compose.override.yml
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Maven wrapper cache ──────────────────────────────────────────────────────
+.mvn/wrapper/maven-wrapper.jar
