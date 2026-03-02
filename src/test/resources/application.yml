@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:tc:postgresql:16:///toys_catalog_test
+    url: jdbc:tc:postgresql:16:///shopfy_test
     username: test
     password: test
   flyway:

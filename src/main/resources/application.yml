@@ -1,11 +1,11 @@
 spring:
   application:
-    name: toys-catalog
+    name: shopfy
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:toys_catalog}
-    username: ${DB_USER:toys}
-    password: ${DB_PASSWORD:toys}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:shopfy}
+    username: ${DB_USER:shopfy}
+    password: ${DB_PASSWORD:shopfy}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -57,11 +57,11 @@ springdoc:
     operationsSorter: method
     tagsSorter: alpha
   info:
-    title: Toys Catalog API
+    title: Shopfy API
     version: v1
-    description: REST API for the Toys Catalog e-commerce platform
+    description: REST API for the Shopfy e-commerce platform
 
 logging:
   level:
-    com.toyscatalog: DEBUG
+    com.shopfy: DEBUG
     org.springframework.security: WARN

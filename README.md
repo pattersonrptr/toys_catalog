@@ -1,8 +1,9 @@
-# 🧸 Toys Catalog
+# 🛍️ Shopfy
 
-A modern, production-ready e-commerce platform built with **Java 21** and **Spring Boot 3.4**.
+A modern, generic e-commerce platform built with **Java 21** and **Spring Boot 3.4**.  
+Sell anything — toys, electronics, clothing, books. Just register your products and go.
 
-> Originally a 2017 university project (Java Servlets + JSP + MySQL). Fully rebuilt from scratch with modern architecture, ready to evolve into a feature-complete online store.
+> Originally a 2017 university project (Java EE Servlets + JSP + MySQL) called *Toys Catalog*. Fully rebuilt from scratch with modern architecture, ready to evolve into a feature-complete online store.
 
 ---
 
@@ -15,7 +16,7 @@ domain/           ← Entities, Repository interfaces (pure domain)
 infrastructure/   ← Security config, external integrations
 ```
 
-This follows a **Layered Architecture** inspired by Domain-Driven Design, making it easy to evolve toward a Hexagonal or Clean Architecture as complexity grows.
+Layered Architecture inspired by Domain-Driven Design, easy to evolve toward Hexagonal/Clean Architecture.
 
 ---
 
@@ -52,7 +53,7 @@ docker compose up --build
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
-Then run `ToysCatalogApplication` from your IDE, or:
+Then run `ShopfyApplication` from your IDE, or:
 ```bash
 ./mvnw spring-boot:run
 ```
@@ -90,7 +91,7 @@ docker compose down -v       # removes volumes (wipes database)
 
 ### Search example
 ```
-GET /api/v1/products/search?q=saint+seiya&categoryId=2&minPrice=100&maxPrice=200&page=0&size=10&sort=price,asc
+GET /api/v1/products/search?q=action+figure&categoryId=2&minPrice=100&maxPrice=200&page=0&size=10&sort=price,asc
 ```
 
 ---
@@ -143,10 +144,10 @@ Tests use **Testcontainers** — a real PostgreSQL container is spun up automati
 
 ## 📁 Legacy
 
-The original 2017 Java EE project (Servlets + JSP + MySQL) is preserved in the `legacy/` folder for historical reference.
+The original 2017 Java EE project (Servlets + JSP + MySQL), then called *Toys Catalog*, is preserved in the `legacy/` folder for historical reference.
 
 ---
 
-## �� License
+## 📄 License
 
 MIT

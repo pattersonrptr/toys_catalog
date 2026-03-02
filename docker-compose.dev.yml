@@ -4,18 +4,18 @@ services:
 
   db:
     image: postgres:16-alpine
-    container_name: toys_catalog_db_dev
+    container_name: shopfy_db_dev
     restart: unless-stopped
     environment:
-      POSTGRES_DB: toys_catalog
-      POSTGRES_USER: toys
-      POSTGRES_PASSWORD: toys
+      POSTGRES_DB: shopfy
+      POSTGRES_USER: shopfy
+      POSTGRES_PASSWORD: shopfy
     ports:
       - "5432:5432"
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U toys -d toys_catalog"]
+      test: ["CMD-SHELL", "pg_isready -U shopfy -d shopfy"]
       interval: 5s
       timeout: 3s
       retries: 5
