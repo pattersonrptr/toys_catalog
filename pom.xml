@@ -11,11 +11,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.toyscatalog</groupId>
-    <artifactId>toys-catalog</artifactId>
+    <groupId>com.shopfy</groupId>
+    <artifactId>shopfy</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>toys-catalog</name>
-    <description>A modern toy catalog / e-commerce platform built with Spring Boot 3 and Java 21</description>
+    <name>shopfy</name>
+    <description>Shopfy — a modern, generic e-commerce platform built with Spring Boot 3 and Java 21</description>
 
     <properties>
         <java.version>21</java.version>
@@ -134,7 +134,7 @@
                     </excludes>
                     <!-- Gera imagem OCI/Docker sem precisar de Dockerfile -->
                     <image>
-                        <name>toys-catalog:${project.version}</name>
+                        <name>shopfy:${project.version}</name>
                     </image>
                 </configuration>
             </plugin>
