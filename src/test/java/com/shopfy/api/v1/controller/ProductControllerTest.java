@@ -3,9 +3,14 @@ package com.shopfy.api.v1.controller;
 import com.shopfy.api.v1.dto.CategoryResponse;
 import com.shopfy.api.v1.dto.ProductResponse;
 import com.shopfy.application.product.ProductService;
+import com.shopfy.infrastructure.security.JwtService;
+import com.shopfy.infrastructure.security.ShopfyUserDetailsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -21,11 +26,21 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ProductController.class)
+@WebMvcTest(
+        value = ProductController.class,
+        excludeAutoConfiguration = {
+                SecurityAutoConfiguration.class,
+                SecurityFilterAutoConfiguration.class,
+                UserDetailsServiceAutoConfiguration.class
+        }
+)
 class ProductControllerTest {
 
     @Autowired MockMvc mockMvc;
     @MockitoBean ProductService productService;
+    // Necessário porque SecurityConfig (carregado pelo scan) depende destes beans
+    @MockitoBean JwtService jwtService;
+    @MockitoBean ShopfyUserDetailsService userDetailsService;
 
     @Test
     @DisplayName("GET /api/v1/products should return 200 with product list")
