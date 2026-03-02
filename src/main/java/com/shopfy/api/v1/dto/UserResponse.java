@@ -1,5 +1,6 @@
 package com.shopfy.api.v1.dto;
 
+import com.shopfy.domain.user.Role;
 import com.shopfy.domain.user.User;
 
 import java.time.LocalDateTime;
@@ -8,7 +9,7 @@ public record UserResponse(
         Long id,
         String name,
         String email,
-        String role,
+        Role role,
         LocalDateTime createdAt
 ) {
     public static UserResponse from(User user) {
@@ -16,7 +17,7 @@ public record UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole().name(),
+                user.getRole(),
                 user.getCreatedAt()
         );
     }
