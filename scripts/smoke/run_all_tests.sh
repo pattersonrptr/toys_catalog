@@ -109,6 +109,9 @@ run_suite "${SCRIPT_DIR}/test_cart.sh"         "Cart"
 # ── Step 7: orders ────────────────────────────────────────────────────────────
 run_suite "${SCRIPT_DIR}/test_orders.sh"       "Orders"
 
+# ── Step 8: reviews ───────────────────────────────────────────────────────────
+run_suite "${SCRIPT_DIR}/test_reviews.sh"      "Reviews"
+
 # ── Grand summary ─────────────────────────────────────────────────────────────
 echo -e "${BOLD}${CYAN}╔══════════════════════════════════════════════════╗${RESET}"
 echo -e "${BOLD}${CYAN}║                GRAND TOTAL                       ║${RESET}"
