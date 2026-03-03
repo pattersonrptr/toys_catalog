@@ -9,6 +9,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.net.URI;
 import java.time.Instant;
@@ -70,6 +72,27 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred");
         problem.setTitle("Internal Server Error");
         problem.setType(URI.create("https://shopfy.com/errors/internal-error"));
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
+
+    @ExceptionHandler(S3Exception.class)
+    ProblemDetail handleS3(S3Exception ex) {
+        log.error("Storage error: {}", ex.getMessage(), ex);
+        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY,
+                "Storage service is unavailable. Please try again later.");
+        problem.setTitle("Storage Error");
+        problem.setType(URI.create("https://shopfy.com/errors/storage-error"));
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ProblemDetail handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "Uploaded file exceeds the maximum allowed size");
+        problem.setTitle("File Too Large");
+        problem.setType(URI.create("https://shopfy.com/errors/file-too-large"));
         problem.setProperty("timestamp", Instant.now());
         return problem;
     }

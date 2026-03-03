@@ -30,6 +30,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -37,11 +39,50 @@ services:
       DB_USER: shopfy
       DB_PASSWORD: shopfy
       SERVER_PORT: 8080
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_BUCKET: shopfy-images
+      STORAGE_ACCESS_KEY: minioadmin
+      STORAGE_SECRET_KEY: minioadmin
+      STORAGE_PUBLIC_URL: http://localhost:9000
     ports:
       - "8080:8080"
+
+  # ─── MinIO (object storage S3-compatible) ─────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: shopfy_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
     volumes:
-      - uploads:/app/uploads
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── MinIO setup: cria bucket e define política pública ───────────────────────
+  minio-setup:
+    image: minio/mc:latest
+    container_name: shopfy_minio_setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin &&
+        mc mb --ignore-existing local/shopfy-images &&
+        mc anonymous set download local/shopfy-images &&
+        echo 'MinIO bucket ready.'
+      "
+    restart: "no"
 
 volumes:
   postgres_data:   # dados do banco persistem entre restarts
-  uploads:         # imagens de produtos
+  minio_data:      # objetos do MinIO

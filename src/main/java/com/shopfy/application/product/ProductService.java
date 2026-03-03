@@ -102,4 +102,32 @@ public class ProductService {
         product.setActive(false);
         productRepository.save(product);
     }
+
+    /**
+     * Persists a new image URL on the product and returns the old URL (or {@code null}
+     * if there was none) so the caller can delete the previous file from storage.
+     */
+    @Transactional
+    public String updateImageUrl(Long id, String imageUrl) {
+        var product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", id));
+        String previous = product.getImageUrl();
+        product.setImageUrl(imageUrl);
+        productRepository.save(product);
+        return previous;
+    }
+
+    /**
+     * Clears the image URL on the product and returns the URL that was stored
+     * (or {@code null} if there was none) so the caller can delete it from storage.
+     */
+    @Transactional
+    public String removeImageUrl(Long id) {
+        var product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", id));
+        String previous = product.getImageUrl();
+        product.setImageUrl(null);
+        productRepository.save(product);
+        return previous;
+    }
 }

@@ -100,6 +100,9 @@ run_suite "${SCRIPT_DIR}/test_categories.sh"   "Categories"
 # ── Step 4: products ──────────────────────────────────────────────────────────
 run_suite "${SCRIPT_DIR}/test_products.sh"     "Products"
 
+# ── Step 5: product images ────────────────────────────────────────────────────
+run_suite "${SCRIPT_DIR}/test_images.sh"       "Product Images"
+
 # ── Grand summary ─────────────────────────────────────────────────────────────
 echo -e "${BOLD}${CYAN}╔══════════════════════════════════════════════════╗${RESET}"
 echo -e "${BOLD}${CYAN}║                GRAND TOTAL                       ║${RESET}"
