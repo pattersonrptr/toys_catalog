@@ -30,6 +30,8 @@ Layered Architecture inspired by Domain-Driven Design, easy to evolve toward Hex
 | Database          | PostgreSQL 16                           |
 | Migrations        | Flyway (V1 schema, V2 seed, V3 users)   |
 | Security          | Spring Security + JWT (JJWT 0.12)       |
+| Object Storage    | MinIO (S3-compatible) via AWS SDK v2    |
+| MIME Detection    | Apache Tika 3.1                         |
 | API Docs          | SpringDoc OpenAPI 3 / Swagger UI        |
 | Containerization  | Docker + Docker Compose                 |
 | Testing           | JUnit 5 + Mockito + Testcontainers      |
@@ -42,7 +44,7 @@ Layered Architecture inspired by Domain-Driven Design, easy to evolve toward Hex
 ### Requirements
 - **Docker** and **Docker Compose** — that's it. No Java, no Maven needed locally.
 
-### Option A — Full stack (app + database)
+### Option A — Full stack (app + database + MinIO)
 ```bash
 docker compose up --build
 ```
@@ -50,6 +52,7 @@ docker compose up --build
 - Swagger UI: http://localhost:8080/swagger-ui.html  
   *(click **Authorize 🔒**, paste the token from `POST /auth/login` to unlock protected endpoints)*
 - Health: http://localhost:8080/actuator/health
+- **MinIO Console**: http://localhost:9001 *(user: `minioadmin`, password: `minioadmin`)*
 
 ### Option B — Development mode (only database, run app from IDE)
 ```bash
@@ -114,6 +117,30 @@ Authorization: Bearer eyJhbGci...
 | POST   | `/api/v1/products`               | ADMIN | Create product           |
 | PUT    | `/api/v1/products/{id}`          | ADMIN | Update product           |
 | DELETE | `/api/v1/products/{id}`          | ADMIN | Soft-delete product      |
+| POST   | `/api/v1/products/{id}/image`    | ADMIN | Upload / replace image   |
+| DELETE | `/api/v1/products/{id}/image`    | ADMIN | Remove image             |
+
+### 🖼️ Image Upload
+
+Upload a product image with `multipart/form-data`, field name `file`:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/products/1/image \
+  -H "Authorization: Bearer <token>" \
+  -F "file=@photo.jpg"
+```
+
+**Rules:**
+- Accepted MIME types: `image/jpeg`, `image/png`, `image/webp` (detected via Apache Tika — content-type header is ignored)
+- Maximum size: **5 MB** per file
+- Existing image is automatically replaced (old file deleted from MinIO)
+
+**Response (200):**
+```json
+{ "productId": 1, "imageUrl": "http://localhost:9000/shopfy-images/products/1/abc123.jpg" }
+```
+
+The `imageUrl` is also returned in every `GET /products/{id}` response. The URL is publicly accessible (no auth required).
 
 ### 🗂️ Categories (GET = public, mutations = ADMIN only)
 | Method | Endpoint                   | Auth  | Description      |
@@ -145,6 +172,28 @@ Seeded automatically by Flyway on first run:
 
 ---
 
+## ⚙️ Environment Variables
+
+| Variable             | Default                      | Description                                  |
+|----------------------|------------------------------|----------------------------------------------|
+| `DB_HOST`            | `localhost`                  | PostgreSQL host                              |
+| `DB_PORT`            | `5432`                       | PostgreSQL port                              |
+| `DB_NAME`            | `shopfy`                     | Database name                                |
+| `DB_USER`            | `shopfy`                     | Database user                                |
+| `DB_PASSWORD`        | `shopfy`                     | Database password                            |
+| `JWT_SECRET`         | (insecure dev default)       | HMAC-SHA256 key — **must change in prod**    |
+| `JWT_EXPIRATION_MS`  | `86400000` (24 h)            | Token lifetime in milliseconds               |
+| `STORAGE_ENDPOINT`   | `http://localhost:9000`      | MinIO / S3 API endpoint                      |
+| `STORAGE_BUCKET`     | `shopfy-images`              | Target bucket name                           |
+| `STORAGE_ACCESS_KEY` | `minioadmin`                 | MinIO / S3 access key                        |
+| `STORAGE_SECRET_KEY` | `minioadmin`                 | MinIO / S3 secret key                        |
+| `STORAGE_PUBLIC_URL` | same as `STORAGE_ENDPOINT`   | Public base URL for object downloads (CDN)   |
+| `SERVER_PORT`        | `8080`                       | HTTP port                                    |
+
+> In Docker Compose, `STORAGE_ENDPOINT` is automatically set to `http://minio:9000` for container-to-container communication. `STORAGE_PUBLIC_URL` should point to the externally reachable MinIO address.
+
+---
+
 ## 🧪 Running tests
 
 ### Unit / slice tests (no Docker required)
@@ -172,7 +221,7 @@ docker compose up --build -d
 ./scripts/smoke/run_all_tests.sh
 ```
 
-**Current status: 32/32 passing ✅**
+**Current status: 32/32 passing ✅** (image tests require running MinIO stack)
 
 | Suite            | Tests | Status |
 |------------------|-------|--------|
@@ -180,6 +229,7 @@ docker compose up --build -d
 | User (/me)       | 3     | ✅     |
 | Categories       | 10    | ✅     |
 | Products         | 12    | ✅     |
+| Product Images   | 11    | ✅     |
 
 ---
 
@@ -209,11 +259,18 @@ docker compose up --build -d
 - [x] H2 in-memory for unit/slice tests — no Docker required
 - [x] Unit tests: `JwtServiceTest`, `AuthServiceTest`
 
-### 🛒 Phase 3 — Product Images
-- [ ] Image upload (multipart, stored locally or S3)
-- [ ] Image URL served via static resource or CDN
+### ✅ Phase 3 — Product Images (done)
+- [x] MinIO object storage (S3-compatible) via Docker Compose
+- [x] AWS SDK v2 `S3Client` wired with path-style access for MinIO
+- [x] Apache Tika MIME detection (prevents content-type spoofing)
+- [x] `POST /api/v1/products/{id}/image` — upload / replace (JPEG, PNG, WebP, max 5 MB)
+- [x] `DELETE /api/v1/products/{id}/image` — remove image + delete from storage
+- [x] Automatic old-image cleanup on replace
+- [x] Publicly accessible image URLs (anonymous download bucket policy)
+- [x] `S3Exception → 502`, `MaxUploadSizeExceededException → 400` in GlobalExceptionHandler
+- [x] Smoke test suite extended (`test_images.sh`, 11 tests)
 
-### �️ Phase 4 — Shopping Cart & Orders
+### 🛒 Phase 4 — Shopping Cart & Orders
 - [ ] Shopping cart (session or DB-backed)
 - [ ] Orders and order status tracking
 - [ ] Payment integration (Mercado Pago / Stripe)
