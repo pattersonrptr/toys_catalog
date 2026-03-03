@@ -19,4 +19,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.id = :id AND o.user.id = :userId")
     Optional<Order> findByIdAndUserIdWithItems(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Query("""
+            SELECT COUNT(o) > 0
+            FROM Order o
+            JOIN o.items i
+            WHERE o.user.id = :userId
+              AND i.product.id = :productId
+              AND o.status = com.shopfy.domain.order.OrderStatus.DELIVERED
+            """)
+    boolean existsDeliveredOrderContainingProduct(
+            @Param("userId") Long userId,
+            @Param("productId") Long productId);
 }

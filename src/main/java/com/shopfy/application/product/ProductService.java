@@ -6,6 +6,7 @@ import com.shopfy.api.v1.exception.ResourceNotFoundException;
 import com.shopfy.domain.category.CategoryRepository;
 import com.shopfy.domain.product.Product;
 import com.shopfy.domain.product.ProductRepository;
+import com.shopfy.domain.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ReviewRepository reviewRepository;
 
     public Page<ProductResponse> findAll(Pageable pageable) {
         return productRepository.findByActiveTrue(pageable)
@@ -50,10 +52,13 @@ public class ProductService {
     }
 
     public ProductResponse findById(Long id) {
-        return productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .filter(Product::isActive)
-                .map(ProductResponse::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
+        return ProductResponse.from(
+                product,
+                reviewRepository.avgRatingByProductId(id),
+                reviewRepository.countByProductId(id));
     }
 
     @Transactional

@@ -6,6 +6,7 @@ import com.shopfy.domain.category.Category;
 import com.shopfy.domain.category.CategoryRepository;
 import com.shopfy.domain.product.Product;
 import com.shopfy.domain.product.ProductRepository;
+import com.shopfy.domain.review.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ class ProductServiceTest {
 
     @Mock ProductRepository productRepository;
     @Mock CategoryRepository categoryRepository;
+    @Mock ReviewRepository reviewRepository;
     @InjectMocks ProductService productService;
 
     Category category;

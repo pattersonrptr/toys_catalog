@@ -171,6 +171,19 @@ The `imageUrl` is also returned in every `GET /products/{id}` response. The URL 
 
 **Order status flow:** `PENDING → CONFIRMED → SHIPPED → DELIVERED` (or `CANCELLED` at any non-terminal stage). Reverting to `PENDING` is not allowed (HTTP 409).
 
+### 🔍 Reviews (GET = public, POST/DELETE = authenticated)
+| Method | Endpoint                              | Auth     | Description                          |
+|--------|---------------------------------------|----------|--------------------------------------|
+| GET    | `/api/v1/products/{id}/reviews`       | —        | List reviews for a product (paginated)|
+| POST   | `/api/v1/products/{id}/reviews`       | Required | Submit a review (verified purchase)  |
+| GET    | `/api/v1/users/me/reviews`            | Required | List own reviews                     |
+| DELETE | `/api/v1/reviews/{id}`                | Required | Delete review (owner or ADMIN)       |
+
+**Rules:**
+- Max 1 review per user per product (HTTP 409 on duplicate)
+- Only users with a `DELIVERED` order containing the product may review (HTTP 409 otherwise)
+- Owner or ADMIN can delete; others get HTTP 409
+
 ### Search example
 ```
 GET /api/v1/products/search?q=action+figure&categoryId=2&minPrice=100&maxPrice=200&page=0&size=10&sort=price,asc
@@ -225,7 +238,7 @@ docker run --rm -v "$(pwd)":/workspace -w /workspace \
 
 Tests use **H2 in-memory** (PostgreSQL compatibility mode) + **Mockito**. No running containers needed.
 
-**Current status: 30/30 passing ✅**
+**Current status: 39/39 passing ✅**
 
 | Suite                    | Tests | Status |
 |--------------------------|-------|--------|
@@ -235,6 +248,7 @@ Tests use **H2 in-memory** (PostgreSQL compatibility mode) + **Mockito**. No run
 | `ProductServiceTest`     | 4     | ✅     |
 | `CartServiceTest`        | 8     | ✅     |
 | `OrderServiceTest`       | 7     | ✅     |
+| `ReviewServiceTest`      | 9     | ✅     |
 
 ### Smoke tests (requires running stack)
 
@@ -243,7 +257,7 @@ docker compose up --build -d
 ./scripts/smoke/run_all_tests.sh
 ```
 
-**Current status: 59/59 passing ✅** (image tests require running MinIO stack)
+**Current status: 73/73 passing ✅** (image tests require running MinIO stack)
 
 | Suite            | Tests | Status |
 |------------------|-------|--------|
@@ -254,6 +268,7 @@ docker compose up --build -d
 | Product Images   | 11    | ✅     |
 | Cart             | 13    | ✅     |
 | Orders           | 16    | ✅     |
+| Reviews          | 14    | ✅     |
 
 ---
 
@@ -306,10 +321,17 @@ docker compose up --build -d
 - [x] Unit tests: `CartServiceTest` (8) + `OrderServiceTest` (7)
 - [x] Smoke test suite extended (`test_cart.sh` 13 + `test_orders.sh` 16 tests)
 
-### 🔍 Phase 5 — Discovery
-- [ ] Full-text search (PostgreSQL FTS or Elasticsearch)
-- [ ] Product reviews and ratings
-- [ ] Purchase history
+### ✅ Phase 5 — Reviews & Ratings (done)
+- [x] Flyway V6 (reviews table: rating 1-5 CHECK, UNIQUE per product+user)
+- [x] `Review` entity + `ReviewRepository` (avg rating, count by product)
+- [x] Verified-purchase gate: only users with a `DELIVERED` order for the product can review
+- [x] `POST /api/v1/products/{id}/reviews` — submit review (201)
+- [x] `GET /api/v1/products/{id}/reviews` — public paginated list
+- [x] `GET /api/v1/users/me/reviews` — own reviews
+- [x] `DELETE /api/v1/reviews/{id}` — owner or ADMIN
+- [x] `ProductResponse` enriched with `avgRating` + `reviewCount` on `GET /products/{id}`
+- [x] Unit tests: `ReviewServiceTest` (9)
+- [x] Smoke test suite extended (`test_reviews.sh`, 14 tests)
 
 ### ⚙️ Phase 6 — CI/CD
 - [ ] GitHub Actions (build + test + Docker push)

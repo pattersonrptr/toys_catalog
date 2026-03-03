@@ -49,7 +49,7 @@ class ProductControllerTest {
         var product = new ProductResponse(
                 1L, "Dohko de Libra", "Descrição", "TOEY", "img.jpg",
                 new BigDecimal("195.98"), 10, true, true, true,
-                category, LocalDateTime.now(), null
+                category, BigDecimal.ZERO, 0L, LocalDateTime.now(), null
         );
         when(productService.findAll(any())).thenReturn(new PageImpl<>(List.of(product), PageRequest.of(0, 20), 1));
 

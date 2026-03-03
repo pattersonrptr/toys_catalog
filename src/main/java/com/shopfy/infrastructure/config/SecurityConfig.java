@@ -78,6 +78,10 @@ public class SecurityConfig {
                         // Admin order management
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/orders").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/admin/orders/**").hasRole("ADMIN")
+                        // Reviews — GET is public (already covered by PUBLIC_GET_ENDPOINTS via products/**)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/products/*/reviews").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me/reviews").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/reviews/**").authenticated()
                         // Everything else is denied by default
                         .anyRequest().denyAll()
                 )
