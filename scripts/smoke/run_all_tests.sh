@@ -103,6 +103,12 @@ run_suite "${SCRIPT_DIR}/test_products.sh"     "Products"
 # ── Step 5: product images ────────────────────────────────────────────────────
 run_suite "${SCRIPT_DIR}/test_images.sh"       "Product Images"
 
+# ── Step 6: cart ──────────────────────────────────────────────────────────────
+run_suite "${SCRIPT_DIR}/test_cart.sh"         "Cart"
+
+# ── Step 7: orders ────────────────────────────────────────────────────────────
+run_suite "${SCRIPT_DIR}/test_orders.sh"       "Orders"
+
 # ── Grand summary ─────────────────────────────────────────────────────────────
 echo -e "${BOLD}${CYAN}╔══════════════════════════════════════════════════╗${RESET}"
 echo -e "${BOLD}${CYAN}║                GRAND TOTAL                       ║${RESET}"

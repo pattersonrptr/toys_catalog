@@ -151,6 +151,26 @@ The `imageUrl` is also returned in every `GET /products/{id}` response. The URL 
 | PUT    | `/api/v1/categories/{id}`  | ADMIN | Update category  |
 | DELETE | `/api/v1/categories/{id}`  | ADMIN | Soft-delete      |
 
+### 🛒 Cart (authenticated customer)
+| Method | Endpoint                      | Auth     | Description                  |
+|--------|-------------------------------|----------|------------------------------|
+| GET    | `/api/v1/cart`                | Required | Get own cart (auto-created)  |
+| POST   | `/api/v1/cart/items`          | Required | Add / increment item         |
+| PUT    | `/api/v1/cart/items/{itemId}` | Required | Update item quantity         |
+| DELETE | `/api/v1/cart/items/{itemId}` | Required | Remove item                  |
+| DELETE | `/api/v1/cart`                | Required | Clear cart                   |
+
+### 📋 Orders (authenticated customer + ADMIN)
+| Method | Endpoint                              | Auth     | Description                     |
+|--------|---------------------------------------|----------|---------------------------------|
+| POST   | `/api/v1/orders`                      | Required | Checkout (cart → order)         |
+| GET    | `/api/v1/orders`                      | Required | List own orders (paginated)     |
+| GET    | `/api/v1/orders/{id}`                 | Required | Get own order by ID             |
+| GET    | `/api/v1/admin/orders`                | ADMIN    | List all orders (paginated)     |
+| PATCH  | `/api/v1/admin/orders/{id}/status`    | ADMIN    | Update order status             |
+
+**Order status flow:** `PENDING → CONFIRMED → SHIPPED → DELIVERED` (or `CANCELLED` at any non-terminal stage). Reverting to `PENDING` is not allowed (HTTP 409).
+
 ### Search example
 ```
 GET /api/v1/products/search?q=action+figure&categoryId=2&minPrice=100&maxPrice=200&page=0&size=10&sort=price,asc
@@ -205,7 +225,7 @@ docker run --rm -v "$(pwd)":/workspace -w /workspace \
 
 Tests use **H2 in-memory** (PostgreSQL compatibility mode) + **Mockito**. No running containers needed.
 
-**Current status: 15/15 passing ✅**
+**Current status: 30/30 passing ✅**
 
 | Suite                    | Tests | Status |
 |--------------------------|-------|--------|
@@ -213,6 +233,8 @@ Tests use **H2 in-memory** (PostgreSQL compatibility mode) + **Mockito**. No run
 | `JwtServiceTest`         | 6     | ✅     |
 | `AuthServiceTest`        | 4     | ✅     |
 | `ProductServiceTest`     | 4     | ✅     |
+| `CartServiceTest`        | 8     | ✅     |
+| `OrderServiceTest`       | 7     | ✅     |
 
 ### Smoke tests (requires running stack)
 
@@ -221,7 +243,7 @@ docker compose up --build -d
 ./scripts/smoke/run_all_tests.sh
 ```
 
-**Current status: 32/32 passing ✅** (image tests require running MinIO stack)
+**Current status: 59/59 passing ✅** (image tests require running MinIO stack)
 
 | Suite            | Tests | Status |
 |------------------|-------|--------|
@@ -230,6 +252,8 @@ docker compose up --build -d
 | Categories       | 10    | ✅     |
 | Products         | 12    | ✅     |
 | Product Images   | 11    | ✅     |
+| Cart             | 13    | ✅     |
+| Orders           | 16    | ✅     |
 
 ---
 
@@ -270,11 +294,17 @@ docker compose up --build -d
 - [x] `S3Exception → 502`, `MaxUploadSizeExceededException → 400` in GlobalExceptionHandler
 - [x] Smoke test suite extended (`test_images.sh`, 11 tests)
 
-### 🛒 Phase 4 — Shopping Cart & Orders
-- [ ] Shopping cart (session or DB-backed)
-- [ ] Orders and order status tracking
-- [ ] Payment integration (Mercado Pago / Stripe)
-- [ ] Transactional email (order confirmation)
+### ✅ Phase 4 — Shopping Cart & Orders (done)
+- [x] Flyway V4 (carts + cart_items) + V5 (orders + order_items)
+- [x] DB-backed cart with lazy creation (`getOrCreateCart`)
+- [x] Cart CRUD: add / increment / update / remove / clear (`/api/v1/cart`)
+- [x] Transactional checkout: stock validation → stock deduction → order creation → cart clear
+- [x] Order status machine: `PENDING → CONFIRMED → SHIPPED → DELIVERED / CANCELLED`
+- [x] Customer endpoints: `POST /orders`, `GET /orders`, `GET /orders/{id}`
+- [x] Admin endpoints: `GET /admin/orders`, `PATCH /admin/orders/{id}/status`
+- [x] `InsufficientStockException` → HTTP 409
+- [x] Unit tests: `CartServiceTest` (8) + `OrderServiceTest` (7)
+- [x] Smoke test suite extended (`test_cart.sh` 13 + `test_orders.sh` 16 tests)
 
 ### 🔍 Phase 5 — Discovery
 - [ ] Full-text search (PostgreSQL FTS or Elasticsearch)
