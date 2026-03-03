@@ -43,6 +43,7 @@ services:
       STORAGE_BUCKET: shopfy-images
       STORAGE_ACCESS_KEY: minioadmin
       STORAGE_SECRET_KEY: minioadmin
+      STORAGE_PUBLIC_URL: http://localhost:9000
     ports:
       - "8080:8080"
 

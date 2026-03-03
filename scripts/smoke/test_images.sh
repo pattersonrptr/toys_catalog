@@ -8,6 +8,10 @@
 set -euo pipefail
 source "$(dirname "$0")/_common.sh"
 
+# TOKEN is exported by run_all_tests.sh (via test_auth.sh); default to empty
+# so that set -u does not abort when running the script standalone without a token.
+TOKEN="${TOKEN:-}"
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 # curl_multipart <token> <method> <path> [form_field]
