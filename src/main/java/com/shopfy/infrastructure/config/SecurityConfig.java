@@ -70,6 +70,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, ADMIN_WRITE_PREFIXES).hasRole("ADMIN")
                         // Profile endpoint requires authentication
                         .requestMatchers("/api/v1/me").authenticated()
+                        // Cart — any authenticated user
+                        .requestMatchers("/api/v1/cart/**", "/api/v1/cart").authenticated()
+                        // Orders — any authenticated user (service layer enforces ownership)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders", "/api/v1/orders/**").authenticated()
+                        // Admin order management
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/orders").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/admin/orders/**").hasRole("ADMIN")
                         // Everything else is denied by default
                         .anyRequest().denyAll()
                 )
